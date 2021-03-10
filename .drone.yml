@@ -1,0 +1,55 @@
+---
+kind: pipeline
+name: startnotify
+
+steps:
+- name: startnotify
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: SLACK_WEB_URL
+    channel: docker-image-builds
+    template: >
+        Build {{build.number}} of {{build.branch}} started. {{build.link}}
+
+---
+kind: pipeline
+name: imagebuild
+
+steps:
+- name: docker  
+  image: plugins/docker
+  settings:
+    username: 
+      from_secret: docker_registry_username
+    password: 
+      from_secret: docker_registry_password
+    repo: jarrodl/tfdevbox
+    tags:
+      - ${DRONE_COMMIT_SHA:0:7}
+      - ${DRONE_COMMIT_BRANCH}
+
+---
+kind: pipeline
+name: endnotify
+
+depends_on: [ imagebuild ]
+  
+trigger:
+    status: [ success, failure ]
+
+steps:
+- name: endnotify
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: SLACK_WEB_URL
+    channel: docker-image-builds
+    template: >
+      {{#success build.status}}
+        build {{build.number}} {{build.link}} Success. Container Built / Test / Uploaded - Nice One !
+      {{else}}
+        build {{build.number}} {{build.link}} Failed. Computer says No !
+      {{/success}}
+  when:
+      status: [ success, failure ]
