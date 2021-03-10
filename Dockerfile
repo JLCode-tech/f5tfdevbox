@@ -15,7 +15,7 @@ LABEL maintainer "jarrod@f5.com"
 RUN pip install --upgrade pip
 
 # Add required pip packages
-RUN pip install bigsuds f5-sdk paramiko netaddr deepdiff ansible-lint ansible-review openshift google-auth boto jmespath git
+RUN pip install bigsuds f5-sdk paramiko netaddr deepdiff ansible-lint ansible-review openshift google-auth boto jmespath python-git
 
 # Setup various users and passwords
 RUN adduser -h /home/tfdevbox -u 1000 -s /bin/bash tfdevbox -D
